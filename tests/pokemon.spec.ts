@@ -44,9 +44,20 @@ for (const pokemon of pokemonData) {
     await page.goto(`https://en.wikipedia.org/wiki/${pokemon.name}`);
     
     const title = await page.title();
+
     expect(title).toBe(`${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)} - Wikipedia`);
+
+    const section = await page.waitForSelector('span#Appearances');
+
+    // Buscando el primer párrafo de la sección
+    const firstParagraph = await section.evaluateHandle(async (span) => {
+      const parent = span.closest('h2')?.nextElementSibling;
+      if (parent && parent.tagName === 'P') {
+          return parent.innerText;
+      }
+      return null;
+  });
     
-    const conceptAndDesignParagraph = await page.locator('#Concept_and_design + p').textContent();
-    console.log(`First paragraph of "Concept and design" for ${pokemon.name}:`, conceptAndDesignParagraph);
+    console.log(`First paragraph of "Appearances" for ${pokemon.name}:`, firstParagraph);
   });
 }
